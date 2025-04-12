@@ -1,7 +1,5 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import { MongoDBStorage } from "./database/mongodb-storage";
 
 // Import controllers
 import * as authController from "./controllers/auth";
@@ -15,12 +13,6 @@ import { requireAuth } from "./middleware/auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
-  app.post('/api/register', authController.register);
-  app.post('/api/login', authController.login);
-  app.post('/api/logout', authController.logout);
-  app.get('/api/user', requireAuth, authController.getMe);
-  
-  // Also keep the original auth routes for backward compatibility
   app.post('/api/auth/register', authController.register);
   app.post('/api/auth/login', authController.login);
   app.post('/api/auth/logout', authController.logout);
@@ -46,17 +38,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/itineraries/:id', requireAuth, itinerariesController.deleteItinerary);
   app.patch('/api/itineraries/items/:itemId/status', requireAuth, itinerariesController.updateItemStatus);
 
-  // OpenAI routes
+  // OpenAI/Gemini routes
   app.post('/api/ai/query', openaiController.processQuery);
   app.post('/api/ai/generate-itinerary', openaiController.generateItinerary);
   app.post('/api/ai/restaurant-recommendations', openaiController.getRestaurantRecommendations);
   app.post('/api/ai/analyze-preferences', openaiController.analyzePreferences);
   app.post('/api/ai/voice-query', openaiController.processVoiceQuery);
 
-  // Activities routes (handled by the destinations controller for now)
-  app.get('/api/activities/popular', destinationsController.getPopularActivities);
-
-  const httpServer = createServer(app);
-
-  return httpServer;
+  // Create and return HTTP server
+  return createServer(app);
 }
