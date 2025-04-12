@@ -59,8 +59,8 @@ app.use((req, res, next) => {
     
     if (mongoStorage) {
       console.log('MongoDB connection established successfully');
-      // If we successfully connected, we could use mongo storage here
-      // For simplicity, we'll stick with memory storage for now
+      // Replace the default storage with MongoDB storage
+      global.storage = mongoStorage;
     } else {
       console.log('Falling back to in-memory storage');
     }
