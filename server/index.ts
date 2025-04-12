@@ -53,11 +53,7 @@ app.use((req, res, next) => {
 (async () => {
   // Declare global namespace extension for TypeScript
 declare global {
-  namespace NodeJS {
-    interface Global {
-      storage: any;
-    }
-  }
+  var storage: any;
 }
 
 // Try to connect to MongoDB, but use memory storage if it fails
