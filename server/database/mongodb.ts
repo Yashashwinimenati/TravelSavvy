@@ -1,7 +1,11 @@
 import mongoose from 'mongoose';
 import { MongoDBStorage } from './mongodb-storage';
 
-const MONGODB_URI = 'mongodb+srv://20691a05m8:MkpdHo0CroaKrDW2@clusterone.23kkr7c.mongodb.net/travelapp';
+// Optional MongoDB URI from environment or default to fallback
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://20691a05m8:MkpdHo0CroaKrDW2@clusterone.23kkr7c.mongodb.net/travelapp';
+
+// Set a reasonable timeout for MongoDB connection
+const MONGODB_TIMEOUT_MS = 5000; 
 
 export async function connectToDatabase() {
   try {
@@ -10,7 +14,14 @@ export async function connectToDatabase() {
       return;
     }
     
-    await mongoose.connect(MONGODB_URI);
+    // Set a connection timeout
+    const connectOptions = {
+      serverSelectionTimeoutMS: MONGODB_TIMEOUT_MS,
+      connectTimeoutMS: MONGODB_TIMEOUT_MS
+    };
+    
+    // Connect with timeout
+    await mongoose.connect(MONGODB_URI, connectOptions);
     console.log('MongoDB connected successfully');
     
     // Initialize the storage with sample data
@@ -20,7 +31,8 @@ export async function connectToDatabase() {
     return storage;
   } catch (error) {
     console.error('MongoDB connection error:', error);
-    throw new Error('Failed to connect to MongoDB');
+    // Instead of throwing error, return null to indicate fallback to memory storage
+    return null;
   }
 }
 

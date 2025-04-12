@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { connectToDatabase, disconnectFromDatabase } from "./database/mongodb";
 
 const app = express();
 app.use(express.json());
@@ -37,6 +38,23 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Try to connect to MongoDB, but use memory storage if it fails
+  try {
+    // Attempt MongoDB connection with a timeout
+    console.log('Attempting to connect to MongoDB...');
+    const mongoStorage = await connectToDatabase();
+    
+    if (mongoStorage) {
+      console.log('MongoDB connection established successfully');
+      // If we successfully connected, we could use mongo storage here
+      // For simplicity, we'll stick with memory storage for now
+    } else {
+      console.log('Falling back to in-memory storage');
+    }
+  } catch (error) {
+    console.warn('Failed to connect to MongoDB, using in-memory storage:', error);
+  }
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

@@ -39,7 +39,6 @@ const bookingSchema = new Schema<BookingDocument>(
     confirmationCode: { type: String }
   },
   { 
-    timestamps: true,
     // Only include createdAt, not updatedAt
     timestamps: {
       createdAt: true,

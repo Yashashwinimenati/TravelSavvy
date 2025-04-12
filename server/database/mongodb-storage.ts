@@ -14,9 +14,9 @@ import {
   Restaurant, 
   Activity,
   Itinerary, 
-  Booking, 
-  ItineraryDay
+  Booking
 } from '../../shared/schema';
+import { ItineraryDay, ItineraryItem } from '@/lib/types';
 
 export class MongoDBStorage implements IStorage {
   
