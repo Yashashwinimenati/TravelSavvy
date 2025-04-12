@@ -551,6 +551,199 @@ export const analyzePreferences = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Input is required" });
     }
     
+    // OpenAI API quota exceeded, provide a fallback response
+    const inputLower = input.toLowerCase();
+    
+    // Create fallback analysis with basic pattern matching
+    const fallbackPreferences: any = {
+      destinations: [],
+      interests: [],
+      cuisines: [],
+      budget: "medium",
+      travelStyle: [],
+      travelDuration: "",
+      accommodation: []
+    };
+    
+    // Extract destinations
+    const destinations = [
+      "Paris", "Tokyo", "New York", "London", "Rome", "Barcelona", "Sydney",
+      "Amsterdam", "Dubai", "Singapore", "Bangkok", "Hong Kong", "San Francisco", 
+      "Los Angeles", "Chicago", "Miami", "Las Vegas", "Orlando", "Bali", "Hawaii",
+      "Italy", "France", "Japan", "Thailand", "Spain", "Germany", "Australia",
+      "Canada", "Mexico", "Brazil", "China", "India", "Greece", "Portugal"
+    ];
+    
+    for (const dest of destinations) {
+      if (inputLower.includes(dest.toLowerCase())) {
+        fallbackPreferences.destinations.push(dest);
+      }
+    }
+    
+    // Extract interests
+    const interestPatterns = {
+      "hiking": ["hiking", "hike", "trail", "trekking", "mountain"],
+      "museums": ["museum", "art", "gallery", "exhibit", "history"],
+      "beaches": ["beach", "sand", "ocean", "swimming", "sunbathing"],
+      "shopping": ["shopping", "shop", "mall", "boutique", "market"],
+      "nightlife": ["nightlife", "party", "club", "bar", "dancing"],
+      "dining": ["restaurant", "dining", "food tour", "culinary", "gastronomy"],
+      "sightseeing": ["sightseeing", "landmark", "monument", "tour", "attractions"],
+      "adventure": ["adventure", "adrenaline", "extreme", "exciting", "thrill"],
+      "relaxation": ["relaxation", "spa", "retreat", "peaceful", "tranquil"],
+      "cultural": ["cultural", "culture", "local", "tradition", "authentic"]
+    };
+    
+    for (const [interest, patterns] of Object.entries(interestPatterns)) {
+      for (const pattern of patterns) {
+        if (inputLower.includes(pattern)) {
+          fallbackPreferences.interests.push(interest);
+          break;
+        }
+      }
+    }
+    
+    // Extract cuisine preferences
+    const cuisinePatterns = {
+      "Italian": ["italian", "pasta", "pizza", "mediterranean"],
+      "Japanese": ["japanese", "sushi", "ramen", "tempura"],
+      "Chinese": ["chinese", "dim sum", "asian"],
+      "Mexican": ["mexican", "tacos", "spicy"],
+      "Indian": ["indian", "curry", "spicy"],
+      "French": ["french", "pastry", "gourmet"],
+      "Thai": ["thai", "spicy"],
+      "Vegetarian/Vegan": ["vegetarian", "vegan", "plant-based"],
+      "Seafood": ["seafood", "fish", "ocean"],
+      "Street Food": ["street food", "local food", "authentic"]
+    };
+    
+    for (const [cuisine, patterns] of Object.entries(cuisinePatterns)) {
+      for (const pattern of patterns) {
+        if (inputLower.includes(pattern)) {
+          fallbackPreferences.cuisines.push(cuisine);
+          break;
+        }
+      }
+    }
+    
+    // Extract budget preference
+    if (inputLower.includes("luxury") || 
+        inputLower.includes("high-end") || 
+        inputLower.includes("five star") || 
+        inputLower.includes("5 star") ||
+        inputLower.includes("premium") ||
+        inputLower.includes("expensive")) {
+      fallbackPreferences.budget = "high";
+    } else if (inputLower.includes("budget") || 
+               inputLower.includes("cheap") || 
+               inputLower.includes("affordable") ||
+               inputLower.includes("low cost") ||
+               inputLower.includes("economy") ||
+               inputLower.includes("inexpensive")) {
+      fallbackPreferences.budget = "low";
+    }
+    
+    // Extract travel style
+    const travelStylePatterns = {
+      "Adventure": ["adventure", "exciting", "thrill", "action"],
+      "Luxury": ["luxury", "luxurious", "high-end", "premium", "exclusive"],
+      "Cultural": ["cultural", "culture", "history", "authentic", "local"],
+      "Family": ["family", "kid", "children", "family-friendly"],
+      "Solo": ["solo", "alone", "by myself", "independent"],
+      "Romantic": ["romantic", "couple", "honeymoon", "anniversary"],
+      "Backpacking": ["backpack", "backpacking", "budget", "hostel"],
+      "Eco-friendly": ["eco", "sustainable", "green", "responsible"],
+      "Photography": ["photo", "photography", "instagram", "camera"],
+      "Foodie": ["food", "culinary", "cuisine", "dining", "restaurant"]
+    };
+    
+    for (const [style, patterns] of Object.entries(travelStylePatterns)) {
+      for (const pattern of patterns) {
+        if (inputLower.includes(pattern)) {
+          fallbackPreferences.travelStyle.push(style);
+          break;
+        }
+      }
+    }
+    
+    // Extract travel duration
+    const durationRegex = /(\d+)\s+(day|days|week|weeks|month|months)/i;
+    const durationMatch = input.match(durationRegex);
+    if (durationMatch) {
+      const number = parseInt(durationMatch[1]);
+      const unit = durationMatch[2].toLowerCase();
+      
+      if (unit === "week" || unit === "weeks") {
+        fallbackPreferences.travelDuration = `${number * 7} days`;
+      } else if (unit === "month" || unit === "months") {
+        fallbackPreferences.travelDuration = `${number * 30} days`;
+      } else {
+        fallbackPreferences.travelDuration = `${number} days`;
+      }
+    }
+    
+    // Extract accommodation preferences
+    const accommodationPatterns = {
+      "Hotel": ["hotel", "resort", "5-star", "4-star", "3-star"],
+      "Hostel": ["hostel", "dorm", "backpacker"],
+      "Apartment": ["apartment", "flat", "airbnb", "rental"],
+      "Villa": ["villa", "house", "cottage", "cabin"],
+      "Camping": ["camping", "tent", "camper", "rv", "glamping"],
+      "Boutique": ["boutique", "unique", "charming", "small hotel"]
+    };
+    
+    for (const [accomm, patterns] of Object.entries(accommodationPatterns)) {
+      for (const pattern of patterns) {
+        if (inputLower.includes(pattern)) {
+          fallbackPreferences.accommodation.push(accomm);
+          break;
+        }
+      }
+    }
+    
+    // If nothing matched, add some defaults
+    if (fallbackPreferences.destinations.length === 0) {
+      fallbackPreferences.destinations = ["Paris", "Tokyo", "New York"];
+    }
+    
+    if (fallbackPreferences.interests.length === 0) {
+      fallbackPreferences.interests = ["sightseeing", "cultural", "dining"];
+    }
+    
+    if (fallbackPreferences.cuisines.length === 0) {
+      fallbackPreferences.cuisines = ["local cuisine"];
+    }
+    
+    if (fallbackPreferences.travelStyle.length === 0) {
+      fallbackPreferences.travelStyle = ["Cultural"];
+    }
+    
+    if (fallbackPreferences.accommodation.length === 0) {
+      fallbackPreferences.accommodation = ["Hotel"];
+    }
+    
+    if (!fallbackPreferences.travelDuration) {
+      fallbackPreferences.travelDuration = "7 days";
+    }
+    
+    // Remove duplicates from arrays
+    fallbackPreferences.destinations = [...new Set(fallbackPreferences.destinations)];
+    fallbackPreferences.interests = [...new Set(fallbackPreferences.interests)];
+    fallbackPreferences.cuisines = [...new Set(fallbackPreferences.cuisines)];
+    fallbackPreferences.travelStyle = [...new Set(fallbackPreferences.travelStyle)];
+    fallbackPreferences.accommodation = [...new Set(fallbackPreferences.accommodation)];
+    
+    res.status(200).json({
+      preferences: fallbackPreferences,
+      tokens: {
+        prompt: 0,
+        completion: 0,
+        total: 0
+      }
+    });
+    
+    /* 
+    // This code is temporarily disabled due to API quota limits
     // Process with OpenAI
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -587,6 +780,7 @@ export const analyzePreferences = async (req: Request, res: Response) => {
         total: response.usage?.total_tokens || 0
       }
     });
+    */
   } catch (error: any) {
     console.error("OpenAI preferences analysis error:", error);
     res.status(500).json({ 
@@ -605,6 +799,185 @@ export const processVoiceQuery = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Transcript is required" });
     }
     
+    // OpenAI API quota exceeded, provide a fallback response
+    let transcriptLower = transcript.toLowerCase();
+    let intent = "general";
+    let destination = "";
+    let cuisine = "";
+    let date = "";
+    let time = "";
+    let partySize = "";
+    let preferences = [];
+    let response = "I'm sorry, I didn't fully understand your request. Could you please provide more details?";
+    
+    // Detect intent
+    if (transcriptLower.includes("restaurant") || 
+        transcriptLower.includes("eat") || 
+        transcriptLower.includes("food") ||
+        transcriptLower.includes("dining") ||
+        transcriptLower.includes("lunch") ||
+        transcriptLower.includes("dinner")) {
+      
+      if (transcriptLower.includes("book") || 
+          transcriptLower.includes("reserve") || 
+          transcriptLower.includes("reservation") ||
+          transcriptLower.includes("table")) {
+        intent = "restaurant_booking";
+        response = "I can help you book a restaurant. Would you like me to find available options?";
+      } else {
+        intent = "restaurant_search";
+        response = "I can help you find restaurants. What type of cuisine are you interested in?";
+      }
+      
+      // Extract cuisine
+      if (transcriptLower.includes("italian")) {
+        cuisine = "Italian";
+        preferences.push("Italian cuisine");
+      } else if (transcriptLower.includes("mexican")) {
+        cuisine = "Mexican";
+        preferences.push("Mexican cuisine");
+      } else if (transcriptLower.includes("japanese") || transcriptLower.includes("sushi")) {
+        cuisine = "Japanese";
+        preferences.push("Japanese cuisine");
+      } else if (transcriptLower.includes("chinese")) {
+        cuisine = "Chinese";
+        preferences.push("Chinese cuisine");
+      } else if (transcriptLower.includes("indian")) {
+        cuisine = "Indian";
+        preferences.push("Indian cuisine");
+      } else if (transcriptLower.includes("french")) {
+        cuisine = "French";
+        preferences.push("French cuisine");
+      } else if (transcriptLower.includes("thai")) {
+        cuisine = "Thai";
+        preferences.push("Thai cuisine");
+      }
+      
+      // Extract party size
+      const partySizeRegex = /(\d+)\s+(people|person|guests?|diners?)/i;
+      const partySizeMatch = transcript.match(partySizeRegex);
+      if (partySizeMatch) {
+        partySize = partySizeMatch[1];
+      }
+      
+      // Extract date
+      const today = new Date();
+      if (transcriptLower.includes("today")) {
+        date = today.toISOString().split('T')[0];
+      } else if (transcriptLower.includes("tomorrow")) {
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        date = tomorrow.toISOString().split('T')[0];
+      } else if (transcriptLower.includes("next week")) {
+        const nextWeek = new Date(today);
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        date = nextWeek.toISOString().split('T')[0];
+      }
+      
+      // Extract time
+      const timeRegex = /(\d{1,2})(:\d{2})?\s*(am|pm|a\.m\.|p\.m\.)/i;
+      const timeMatch = transcript.match(timeRegex);
+      if (timeMatch) {
+        let hour = parseInt(timeMatch[1]);
+        const minutes = timeMatch[2] ? timeMatch[2].substring(1) : "00";
+        const period = timeMatch[3].toLowerCase();
+        
+        if ((period === "pm" || period === "p.m.") && hour < 12) {
+          hour += 12;
+        } else if ((period === "am" || period === "a.m.") && hour === 12) {
+          hour = 0;
+        }
+        
+        time = `${hour.toString().padStart(2, '0')}:${minutes}`;
+      }
+      
+    } else if (transcriptLower.includes("itinerary") || 
+              transcriptLower.includes("plan") || 
+              transcriptLower.includes("schedule") ||
+              transcriptLower.includes("trip") ||
+              transcriptLower.includes("vacation")) {
+      intent = "itinerary";
+      response = "I can help you plan your trip. Which destination are you interested in?";
+    } else if (transcriptLower.includes("destination") || 
+              transcriptLower.includes("place") || 
+              transcriptLower.includes("location") ||
+              transcriptLower.includes("where") ||
+              transcriptLower.includes("country") ||
+              transcriptLower.includes("city")) {
+      intent = "destination";
+      response = "I can provide information about various travel destinations. Which places are you curious about?";
+    }
+    
+    // Extract destination
+    const destinations = [
+      "Paris", "Tokyo", "New York", "London", "Rome", "Barcelona", "Sydney",
+      "Amsterdam", "Dubai", "Singapore", "Bangkok", "Hong Kong", "San Francisco", 
+      "Los Angeles", "Chicago", "Miami", "Las Vegas", "Orlando", "Bali", "Hawaii"
+    ];
+    
+    for (const dest of destinations) {
+      if (transcriptLower.includes(dest.toLowerCase())) {
+        destination = dest;
+        break;
+      }
+    }
+    
+    // Extract additional preferences
+    if (transcriptLower.includes("vegetarian") || transcriptLower.includes("vegan")) {
+      preferences.push("Vegetarian/Vegan options");
+    }
+    if (transcriptLower.includes("gluten free") || transcriptLower.includes("gluten-free")) {
+      preferences.push("Gluten-free options");
+    }
+    if (transcriptLower.includes("romantic") || transcriptLower.includes("date")) {
+      preferences.push("Romantic setting");
+    }
+    if (transcriptLower.includes("family") || transcriptLower.includes("kid")) {
+      preferences.push("Family-friendly");
+    }
+    if (transcriptLower.includes("outdoor") || transcriptLower.includes("patio")) {
+      preferences.push("Outdoor seating");
+    }
+    if (transcriptLower.includes("view") || transcriptLower.includes("scenic")) {
+      preferences.push("Scenic view");
+    }
+    
+    // Customize response based on detected entities
+    if (intent === "restaurant_booking" && destination && cuisine && date && time) {
+      response = `I'll help you book a ${cuisine} restaurant in ${destination} for ${date} at ${time}${partySize ? ` for ${partySize} people` : ""}. Would you like me to proceed?`;
+    } else if (intent === "restaurant_search" && cuisine) {
+      response = `I can recommend some great ${cuisine} restaurants${destination ? ` in ${destination}` : ""}. Would you like to see some options?`;
+    } else if (intent === "itinerary" && destination) {
+      response = `I can help you plan your trip to ${destination}. How many days will you be staying?`;
+    } else if (intent === "destination" && destination) {
+      response = `${destination} is a wonderful destination! Would you like to know about attractions, activities, or accommodations there?`;
+    }
+    
+    // Create the fallback response
+    const fallbackResponse = {
+      intent: intent,
+      entities: {
+        destination: destination,
+        cuisine: cuisine,
+        date: date,
+        time: time,
+        partySize: partySize,
+        preferences: preferences
+      },
+      response: response
+    };
+    
+    res.status(200).json({
+      ...fallbackResponse,
+      tokens: {
+        prompt: 0,
+        completion: 0,
+        total: 0
+      }
+    });
+    
+    /* 
+    // This code is temporarily disabled due to API quota limits
     // Process with OpenAI
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -648,6 +1021,7 @@ export const processVoiceQuery = async (req: Request, res: Response) => {
         total: response.usage?.total_tokens || 0
       }
     });
+    */
   } catch (error: any) {
     console.error("OpenAI voice query processing error:", error);
     res.status(500).json({ 
