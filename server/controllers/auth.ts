@@ -53,7 +53,7 @@ export const register = async (req: Request, res: Response) => {
       lastName: user.lastName
     };
     
-    res.status(201).json(userWithoutPassword);
+    res.status(201).json(userResponse);
   } catch (error: any) {
     console.error("Registration error:", error);
     res.status(500).json({ message: "Failed to register user" });
