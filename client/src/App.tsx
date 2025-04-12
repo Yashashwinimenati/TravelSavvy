@@ -11,6 +11,7 @@ import NotFound from "@/pages/not-found";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import AIAssistant from "@/components/ai/AIAssistant";
+import VoiceCommandManager from "@/components/voice/VoiceCommandManager";
 import { useEffect, useState } from "react";
 
 function App() {
@@ -55,6 +56,7 @@ function App() {
       </main>
       <Footer />
       <AIAssistant />
+      <VoiceCommandManager />
       <Toaster />
     </div>
   );

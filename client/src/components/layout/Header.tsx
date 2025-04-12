@@ -7,11 +7,13 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
+import { useVoiceRecognition } from "@/hooks/use-voice-recognition";
 
 const Header = () => {
   const [location] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const { user, logout } = useAuth();
+  const { isListening, startListening, stopListening } = useVoiceRecognition();
 
   // Handle scroll event to change header appearance
   useEffect(() => {
@@ -29,8 +31,12 @@ const Header = () => {
 
   // Handle voice search
   const handleVoiceSearch = () => {
-    // Trigger custom event to be handled by VoiceCommandManager
-    document.dispatchEvent(new CustomEvent('startVoiceRecognition'));
+    if (isListening) {
+      stopListening();
+    } else {
+      // Trigger custom event to be handled by VoiceCommandManager
+      document.dispatchEvent(new CustomEvent('startVoiceRecognition'));
+    }
   };
 
   // Handle logout
@@ -78,11 +84,12 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             <button 
               type="button" 
-              className="p-2 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors" 
-              aria-label="Voice Search"
+              className={`p-2 rounded-full ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} transition-colors`}
+              aria-label={isListening ? "Stop Listening" : "Voice Search"}
               onClick={handleVoiceSearch}
             >
               <i className="fas fa-microphone"></i>
+              {isListening && <span className="sr-only">Listening...</span>}
             </button>
             
             {user ? (
@@ -148,6 +155,15 @@ const Header = () => {
                   </nav>
                   
                   <div className="mt-auto pb-8">
+                    <Button 
+                      variant={isListening ? "destructive" : "outline"}
+                      className="w-full mb-4 flex items-center justify-center"
+                      onClick={handleVoiceSearch}
+                    >
+                      <i className={`fas fa-microphone ${isListening ? 'animate-pulse' : ''} mr-2`}></i>
+                      {isListening ? "Stop Listening" : "Voice Commands"}
+                    </Button>
+                    
                     {user ? (
                       <div className="space-y-4">
                         <Link to="/profile">

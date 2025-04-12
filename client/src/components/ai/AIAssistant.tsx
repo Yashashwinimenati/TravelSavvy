@@ -35,17 +35,58 @@ const AIAssistant = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Listen for open assistant event
+  // Listen for open assistant event and voice query processing
   useEffect(() => {
     const handleOpenAssistant = () => {
       setIsExpanded(true);
     };
     
+    const handleVoiceQuery = (event: CustomEvent) => {
+      setIsExpanded(true);
+      if (event.detail && event.detail.query) {
+        const voiceText = event.detail.query;
+        setInput(voiceText);
+        // Slight delay to show the user what was transcribed before sending
+        setTimeout(() => {
+          setInput('');
+          // Add user message to chat
+          const newUserMessage: Message = {
+            id: Date.now().toString(),
+            role: 'user',
+            content: voiceText
+          };
+          setMessages(prev => [...prev, newUserMessage]);
+          
+          // Process the voice query
+          processQuery(voiceText)
+            .then(response => {
+              const newAIMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                role: 'assistant',
+                content: response
+              };
+              setMessages(prev => [...prev, newAIMessage]);
+            })
+            .catch(error => {
+              const errorMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                role: 'assistant',
+                content: "I'm sorry, I couldn't process your voice request at the moment. Please try again later."
+              };
+              setMessages(prev => [...prev, errorMessage]);
+            });
+        }, 1000);
+      }
+    };
+    
     document.addEventListener('openAIAssistant', handleOpenAssistant);
+    document.addEventListener('processVoiceQuery', handleVoiceQuery as EventListener);
+    
     return () => {
       document.removeEventListener('openAIAssistant', handleOpenAssistant);
+      document.removeEventListener('processVoiceQuery', handleVoiceQuery as EventListener);
     };
-  }, []);
+  }, [processQuery]);
 
   // Toggle assistant visibility
   const toggleAssistant = () => {
