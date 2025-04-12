@@ -59,6 +59,7 @@ export class MongoDBStorage implements IStorage {
 
   async createUser(userData: InsertUser & { email?: string; firstName?: string; lastName?: string; }): Promise<User> {
     try {
+      console.log('Creating new user with data:', { ...userData, password: '[REDACTED]' });
       // Create new user document
       const newUser = await UserModel.create({
         username: userData.username,

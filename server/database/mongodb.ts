@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { MongoDBStorage } from './mongodb-storage';
 
 // Optional MongoDB URI from environment or default to fallback
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://amnvramachandra:ramachandra559@cluster0.gzkpmmq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0/travelapp';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://amnvramachandra:ramachandra559@cluster0.gzkpmmq.mongodb.net/travelapp?retryWrites=true&w=majority&appName=Cluster0';
 
 // Set a reasonable timeout for MongoDB connection
 const MONGODB_TIMEOUT_MS = 5000; 
