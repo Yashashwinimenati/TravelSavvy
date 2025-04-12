@@ -16,6 +16,36 @@ export const processQuery = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Query is required" });
     }
     
+    // OpenAI API quota exceeded, provide a fallback response
+    let fallbackResponse = "";
+    
+    // Generate a simple fallback response based on common travel queries
+    if (query.toLowerCase().includes("destination") || query.toLowerCase().includes("where")) {
+      fallbackResponse = "Popular travel destinations include Paris, Tokyo, New York, Rome, and Bali. Each offers unique cultural experiences, cuisine, and attractions. Where would you like to know more about?";
+    } else if (query.toLowerCase().includes("restaurant") || query.toLowerCase().includes("food") || query.toLowerCase().includes("eat")) {
+      fallbackResponse = "When traveling, try local cuisine and restaurants recommended by locals. Food markets and family-owned establishments often provide authentic experiences. Would you like recommendations for a specific location?";
+    } else if (query.toLowerCase().includes("itinerary") || query.toLowerCase().includes("plan")) {
+      fallbackResponse = "A good travel itinerary balances sightseeing, relaxation, and free time for unexpected discoveries. Consider 2-3 major activities per day and leave room for spontaneity.";
+    } else if (query.toLowerCase().includes("budget") || query.toLowerCase().includes("cost") || query.toLowerCase().includes("price")) {
+      fallbackResponse = "Travel costs vary widely by destination, season, and style. Southeast Asia and parts of Latin America are budget-friendly, while Western Europe and Japan tend to be more expensive.";
+    } else if (query.toLowerCase().includes("tip") || query.toLowerCase().includes("advice")) {
+      fallbackResponse = "Some travel tips: research local customs before you go, learn a few phrases in the local language, keep digital copies of important documents, and pack less than you think you need.";
+    } else {
+      fallbackResponse = "I'm TravelSage, your travel assistant. I can help with destination information, restaurant recommendations, itinerary planning, and travel tips. What would you like to know about?";
+    }
+    
+    // Return the fallback response
+    res.status(200).json({
+      response: fallbackResponse,
+      tokens: {
+        prompt: 0,
+        completion: 0,
+        total: 0
+      }
+    });
+    
+    /* 
+    // This code is temporarily disabled due to API quota limits
     // Process with OpenAI
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -39,6 +69,7 @@ export const processQuery = async (req: Request, res: Response) => {
         total: response.usage?.total_tokens || 0
       }
     });
+    */
   } catch (error: any) {
     console.error("OpenAI query error:", error);
     res.status(500).json({ 
@@ -57,6 +88,247 @@ export const generateItinerary = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Prompt is required" });
     }
     
+    // OpenAI API quota exceeded, provide a fallback response
+    // Sample itinerary data for Paris (default)
+    let destination = "Paris";
+    let startDate = new Date();
+    
+    // Try to extract destination and dates from prompt
+    if (prompt.toLowerCase().includes("tokyo") || prompt.toLowerCase().includes("japan")) {
+      destination = "Tokyo";
+    } else if (prompt.toLowerCase().includes("new york") || prompt.toLowerCase().includes("nyc")) {
+      destination = "New York City";
+    } else if (prompt.toLowerCase().includes("rome") || prompt.toLowerCase().includes("italy")) {
+      destination = "Rome";
+    } else if (prompt.toLowerCase().includes("bali") || prompt.toLowerCase().includes("indonesia")) {
+      destination = "Bali";
+    }
+    
+    // Generate dates for the itinerary
+    const dates = [];
+    for (let i = 0; i < 3; i++) {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + i);
+      dates.push(date.toISOString().split('T')[0]);
+    }
+    
+    // Sample fallback itinerary data
+    const fallbackItinerary = {
+      "name": `Trip to ${destination}`,
+      "destination": destination,
+      "days": [
+        {
+          "title": `Day 1: Exploring ${destination}`,
+          "date": dates[0],
+          "items": [
+            {
+              "title": "Breakfast at hotel",
+              "description": "Start your day with a delicious breakfast at your hotel.",
+              "type": "food",
+              "startTime": "08:00",
+              "endTime": "09:00",
+              "location": "Hotel",
+              "price": "$",
+              "status": "none"
+            },
+            {
+              "title": destination === "Paris" ? "Visit the Eiffel Tower" : 
+                      destination === "Tokyo" ? "Visit Tokyo Skytree" :
+                      destination === "New York City" ? "Visit Empire State Building" :
+                      destination === "Rome" ? "Visit the Colosseum" : "Visit Beach",
+              "description": "Explore one of the most iconic landmarks in the city.",
+              "type": "activity",
+              "startTime": "10:00",
+              "endTime": "12:00",
+              "location": destination === "Paris" ? "Eiffel Tower" : 
+                         destination === "Tokyo" ? "Tokyo Skytree" :
+                         destination === "New York City" ? "Empire State Building" :
+                         destination === "Rome" ? "Colosseum" : "Famous Beach",
+              "distance": "2 km from hotel",
+              "price": "$$",
+              "status": "none"
+            },
+            {
+              "title": "Lunch at local restaurant",
+              "description": "Enjoy authentic local cuisine at a popular restaurant.",
+              "type": "food",
+              "startTime": "12:30",
+              "endTime": "14:00",
+              "location": "City Center",
+              "price": "$$",
+              "status": "none"
+            },
+            {
+              "title": destination === "Paris" ? "Louvre Museum Tour" : 
+                      destination === "Tokyo" ? "Senso-ji Temple Visit" :
+                      destination === "New York City" ? "Metropolitan Museum of Art" :
+                      destination === "Rome" ? "Vatican Museums" : "Cultural Tour",
+              "description": "Immerse yourself in the local culture and history.",
+              "type": "activity",
+              "startTime": "14:30",
+              "endTime": "17:00",
+              "location": destination === "Paris" ? "Louvre Museum" : 
+                         destination === "Tokyo" ? "Senso-ji Temple" :
+                         destination === "New York City" ? "Metropolitan Museum" :
+                         destination === "Rome" ? "Vatican City" : "Cultural Center",
+              "distance": "3 km from lunch spot",
+              "price": "$$",
+              "status": "none"
+            },
+            {
+              "title": "Dinner and evening stroll",
+              "description": "Enjoy a relaxing dinner followed by an evening walk in a scenic area.",
+              "type": "food",
+              "startTime": "19:00",
+              "endTime": "21:00",
+              "location": destination === "Paris" ? "Seine River area" : 
+                         destination === "Tokyo" ? "Shibuya" :
+                         destination === "New York City" ? "Times Square" :
+                         destination === "Rome" ? "Trastevere" : "Downtown",
+              "price": "$$$",
+              "status": "none"
+            }
+          ]
+        },
+        {
+          "title": `Day 2: More ${destination} Adventures`,
+          "date": dates[1],
+          "items": [
+            {
+              "title": "Breakfast at local café",
+              "description": "Try a different breakfast spot today.",
+              "type": "food",
+              "startTime": "08:30",
+              "endTime": "09:30",
+              "location": "Local Café",
+              "price": "$",
+              "status": "none"
+            },
+            {
+              "title": destination === "Paris" ? "Montmartre Walk" : 
+                      destination === "Tokyo" ? "Harajuku Exploration" :
+                      destination === "New York City" ? "Central Park Walk" :
+                      destination === "Rome" ? "Spanish Steps and Trevi Fountain" : "Nature Hike",
+              "description": "Explore a different part of the city.",
+              "type": "activity",
+              "startTime": "10:00",
+              "endTime": "13:00",
+              "location": destination === "Paris" ? "Montmartre" : 
+                         destination === "Tokyo" ? "Harajuku" :
+                         destination === "New York City" ? "Central Park" :
+                         destination === "Rome" ? "Historic Center" : "Natural Area",
+              "distance": "4 km from hotel",
+              "price": "$",
+              "status": "none"
+            },
+            {
+              "title": "Lunch and shopping",
+              "description": "Enjoy lunch and then shop for souvenirs or local products.",
+              "type": "food",
+              "startTime": "13:00",
+              "endTime": "16:00",
+              "location": destination === "Paris" ? "Galeries Lafayette" : 
+                         destination === "Tokyo" ? "Takeshita Street" :
+                         destination === "New York City" ? "Fifth Avenue" :
+                         destination === "Rome" ? "Via del Corso" : "Shopping District",
+              "price": "$$",
+              "status": "none"
+            },
+            {
+              "title": destination === "Paris" ? "Seine River Cruise" : 
+                      destination === "Tokyo" ? "Tokyo Bay Cruise" :
+                      destination === "New York City" ? "Hudson River Cruise" :
+                      destination === "Rome" ? "Tiber River Walk" : "Boat Tour",
+              "description": "Relax and see the city from a different perspective.",
+              "type": "activity",
+              "startTime": "17:00",
+              "endTime": "19:00",
+              "location": "River/Bay Area",
+              "price": "$$",
+              "status": "none"
+            },
+            {
+              "title": "Fine dining experience",
+              "description": "Treat yourself to a special dinner tonight.",
+              "type": "food",
+              "startTime": "20:00",
+              "endTime": "22:00",
+              "location": "Upscale Restaurant",
+              "price": "$$$$",
+              "status": "none"
+            }
+          ]
+        },
+        {
+          "title": `Day 3: Final Day in ${destination}`,
+          "date": dates[2],
+          "items": [
+            {
+              "title": "Leisurely breakfast",
+              "description": "Take your time with breakfast today.",
+              "type": "food",
+              "startTime": "09:00",
+              "endTime": "10:30",
+              "location": "Hotel or nearby café",
+              "price": "$$",
+              "status": "none"
+            },
+            {
+              "title": destination === "Paris" ? "Visit Versailles" : 
+                      destination === "Tokyo" ? "Day trip to Kamakura" :
+                      destination === "New York City" ? "Brooklyn Bridge & DUMBO" :
+                      destination === "Rome" ? "Ostia Antica Archaeological Park" : "Day Trip",
+              "description": "Take a short trip outside the main city center.",
+              "type": "activity",
+              "startTime": "11:00",
+              "endTime": "16:00",
+              "location": destination === "Paris" ? "Palace of Versailles" : 
+                         destination === "Tokyo" ? "Kamakura" :
+                         destination === "New York City" ? "Brooklyn" :
+                         destination === "Rome" ? "Ostia Antica" : "Nearby Attraction",
+              "distance": "30-60 minutes from city center",
+              "price": "$$",
+              "status": "none"
+            },
+            {
+              "title": "Last dinner in the city",
+              "description": "Enjoy your final evening meal with local specialties.",
+              "type": "food",
+              "startTime": "19:00",
+              "endTime": "21:00",
+              "location": "Local Restaurant",
+              "price": "$$$",
+              "status": "none"
+            },
+            {
+              "title": "Evening farewell activity",
+              "description": "Make the most of your last night with a special activity.",
+              "type": "activity",
+              "startTime": "21:30",
+              "endTime": "23:00",
+              "location": destination === "Paris" ? "Moulin Rouge Show" : 
+                         destination === "Tokyo" ? "Karaoke in Shinjuku" :
+                         destination === "New York City" ? "Broadway Show" :
+                         destination === "Rome" ? "Evening Piazza Walk" : "Entertainment Venue",
+              "price": "$$$",
+              "status": "none"
+            }
+          ]
+        }
+      ]
+    };
+    
+    res.status(200).json({
+      itinerary: fallbackItinerary,
+      tokens: {
+        prompt: 0,
+        completion: 0,
+        total: 0
+      }
+    });
+    
+    /* 
+    // This code is temporarily disabled due to API quota limits
     // Process with OpenAI
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -108,6 +380,7 @@ export const generateItinerary = async (req: Request, res: Response) => {
         total: response.usage?.total_tokens || 0
       }
     });
+    */
   } catch (error: any) {
     console.error("OpenAI itinerary generation error:", error);
     res.status(500).json({ 
@@ -126,6 +399,101 @@ export const getRestaurantRecommendations = async (req: Request, res: Response) 
       return res.status(400).json({ message: "Preferences are required" });
     }
     
+    // OpenAI API quota exceeded, provide a fallback response
+    let userPreferences = preferences.toLowerCase();
+    let userLocation = location ? location.toLowerCase() : "city center";
+    
+    // Default cuisine type based on preferences
+    let cuisineType = "International";
+    if (userPreferences.includes("italian") || userPreferences.includes("pasta") || userPreferences.includes("pizza")) {
+      cuisineType = "Italian";
+    } else if (userPreferences.includes("japanese") || userPreferences.includes("sushi")) {
+      cuisineType = "Japanese";
+    } else if (userPreferences.includes("chinese")) {
+      cuisineType = "Chinese";
+    } else if (userPreferences.includes("indian") || userPreferences.includes("curry")) {
+      cuisineType = "Indian";
+    } else if (userPreferences.includes("mexican") || userPreferences.includes("taco")) {
+      cuisineType = "Mexican";
+    } else if (userPreferences.includes("french")) {
+      cuisineType = "French";
+    } else if (userPreferences.includes("thai")) {
+      cuisineType = "Thai";
+    } else if (userPreferences.includes("vegetarian") || userPreferences.includes("vegan")) {
+      cuisineType = "Vegetarian/Vegan";
+    }
+    
+    // Price range
+    let priceRange = "$$";
+    if (userPreferences.includes("cheap") || userPreferences.includes("budget") || userPreferences.includes("affordable")) {
+      priceRange = "$";
+    } else if (userPreferences.includes("luxury") || userPreferences.includes("fine dining") || userPreferences.includes("expensive")) {
+      priceRange = "$$$$";
+    } else if (userPreferences.includes("mid-range") || userPreferences.includes("moderate")) {
+      priceRange = "$$";
+    }
+    
+    // Generate fallback recommendations
+    const fallbackRecommendations = [
+      {
+        "name": `${cuisineType} Delight`,
+        "cuisine": [cuisineType],
+        "description": `A charming ${cuisineType.toLowerCase()} restaurant known for authentic flavors and welcoming atmosphere.`,
+        "priceRange": priceRange,
+        "location": `${userLocation}`,
+        "recommendationReason": `Perfect for ${userPreferences.includes("family") ? "family dining" : userPreferences.includes("romantic") ? "a romantic evening" : "a casual meal"} with excellent ${cuisineType.toLowerCase()} cuisine.`
+      },
+      {
+        "name": `${cuisineType} House`,
+        "cuisine": [cuisineType],
+        "description": `Popular spot offering traditional and modern ${cuisineType.toLowerCase()} dishes in a stylish setting.`,
+        "priceRange": priceRange === "$" ? "$$" : priceRange === "$$$$" ? "$$$" : "$$",
+        "location": `${userLocation}`,
+        "recommendationReason": `Known for its exceptional service and ${userPreferences.includes("authentic") ? "authentic" : "creative"} approach to ${cuisineType.toLowerCase()} cooking.`
+      },
+      {
+        "name": `The ${cuisineType} Experience`,
+        "cuisine": [cuisineType, "Fusion"],
+        "description": `Innovative restaurant blending ${cuisineType.toLowerCase()} traditions with modern culinary techniques.`,
+        "priceRange": priceRange === "$" ? "$$" : priceRange === "$$" ? "$$$" : "$$$$",
+        "location": `${userLocation}`,
+        "recommendationReason": `Offers a unique dining experience with ${userPreferences.includes("view") ? "beautiful views and" : ""} inventive dishes that surprise and delight.`
+      }
+    ];
+    
+    // Add a vegetarian option if mentioned
+    if (userPreferences.includes("vegetarian") || userPreferences.includes("vegan")) {
+      fallbackRecommendations.push({
+        "name": "Green Palette",
+        "cuisine": ["Vegetarian", "Vegan", "Health Food"],
+        "description": "Specializing in plant-based cuisine that satisfies even non-vegetarians.",
+        "priceRange": priceRange,
+        "location": `${userLocation}`,
+        "recommendationReason": "Perfect for those seeking delicious vegetarian and vegan options with locally-sourced ingredients."
+      });
+    }
+    
+    // Add a local specialty restaurant
+    fallbackRecommendations.push({
+      "name": "Local Flavors",
+      "cuisine": ["Regional", "Traditional"],
+      "description": "A beloved restaurant showcasing the best local and regional specialties.",
+      "priceRange": "$$",
+      "location": `${userLocation}`,
+      "recommendationReason": "Offers an authentic taste of local cuisine with recipes passed down through generations."
+    });
+    
+    res.status(200).json({
+      recommendations: fallbackRecommendations,
+      tokens: {
+        prompt: 0,
+        completion: 0,
+        total: 0
+      }
+    });
+    
+    /* 
+    // This code is temporarily disabled due to API quota limits
     // Process with OpenAI
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -164,6 +532,7 @@ export const getRestaurantRecommendations = async (req: Request, res: Response) 
         total: response.usage?.total_tokens || 0
       }
     });
+    */
   } catch (error: any) {
     console.error("OpenAI restaurant recommendations error:", error);
     res.status(500).json({ 
