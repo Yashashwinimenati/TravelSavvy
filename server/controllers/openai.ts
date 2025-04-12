@@ -18,22 +18,46 @@ export const processQuery = async (req: Request, res: Response) => {
     // OpenAI API quota exceeded, provide a fallback response
     let fallbackResponse = "";
     
-    // Generate detailed, personalized fallback responses
+    // Generate detailed, personalized fallback responses with rich information
     if (query.toLowerCase().includes("destination") || query.toLowerCase().includes("where")) {
-      fallbackResponse = "I'd be happy to help you find the perfect destination! Here are some curated suggestions:\n\n" +
-        "🌟 For Culture & History: Paris (iconic landmarks, world-class museums), Rome (ancient ruins, artistic heritage)\n" +
-        "🏖️ For Beaches & Relaxation: Bali (tropical paradise, wellness), Maldives (pristine beaches, luxury resorts)\n" +
-        "🌆 For Urban Exploration: Tokyo (modern meets traditional), New York (diverse neighborhoods, entertainment)\n" +
-        "🏔️ For Adventure: New Zealand (outdoor activities), Costa Rica (rainforests, wildlife)\n\n" +
-        "Which type of experience interests you most? I can provide specific details about any destination!";
+      fallbackResponse = "🌎 Let me be your destination expert! Here are some carefully curated suggestions based on different travel styles:\n\n" +
+        "🏛️ Cultural Capitals:\n" +
+        "- Paris: Eiffel Tower, Louvre Museum, Notre-Dame Cathedral, charming cafés\n" +
+        "- Rome: Colosseum, Vatican Museums, Roman Forum, authentic Italian cuisine\n" +
+        "- Kyoto: Ancient temples, tea ceremonies, zen gardens, traditional ryokans\n\n" +
+        "🏖️ Tropical Paradise:\n" +
+        "- Bali: Rice terraces, Hindu temples, yoga retreats, surf spots\n" +
+        "- Maldives: Overwater villas, coral reefs, crystal waters, sunset cruises\n" +
+        "- Phuket: White sand beaches, Thai cuisine, island hopping, spa treatments\n\n" +
+        "🌆 Urban Adventures:\n" +
+        "- Tokyo: Shibuya Crossing, robot restaurants, anime culture, bullet trains\n" +
+        "- New York: Times Square, Central Park, Broadway shows, diverse food scene\n" +
+        "- Dubai: Burj Khalifa, desert safaris, gold souks, luxury shopping\n\n" +
+        "🏔️ Nature & Adventure:\n" +
+        "- New Zealand: Hobbiton, fjords, bungee jumping, Maori culture\n" +
+        "- Costa Rica: Rainforest ziplines, volcanoes, wildlife sanctuaries\n" +
+        "- Switzerland: Alpine hiking, ski resorts, scenic train journeys\n\n" +
+        "Which of these experiences captures your imagination? I can provide detailed itineraries, best times to visit, and insider tips for any destination! 🌟";
     } else if (query.toLowerCase().includes("restaurant") || query.toLowerCase().includes("food") || query.toLowerCase().includes("eat")) {
-      fallbackResponse = "Finding authentic local cuisine is key to a memorable travel experience! Here's my expert advice:\n\n" +
-        "🍽️ Best practices for finding great local food:\n" +
-        "- Follow where locals eat during off-peak hours\n" +
-        "- Explore morning markets for fresh, authentic dishes\n" +
-        "- Look for restaurants with simple menus in the local language\n" +
-        "- Ask your hotel staff for their personal favorites\n\n" +
-        "Would you like specific restaurant recommendations for a particular destination or cuisine type?";
+      fallbackResponse = "🍽️ Let me guide you through the world of culinary delights!\n\n" +
+        "🌏 Must-Try Regional Specialties:\n" +
+        "- Japan: Sushi at Tsukiji Market, Ramen in Fukuoka, Wagyu in Kobe\n" +
+        "- Italy: Pasta in Rome, Pizza in Naples, Risotto in Milan\n" +
+        "- Thailand: Pad Thai in Bangkok, Green Curry, Mango Sticky Rice\n" +
+        "- France: Croissants in Paris, Bouillabaisse in Marseille\n\n" +
+        "🔍 Expert Tips for Finding Authentic Food:\n" +
+        "- Follow the local crowd during lunch hours\n" +
+        "- Explore bustling food markets and street stalls\n" +
+        "- Look for restaurants with handwritten menus\n" +
+        "- Avoid tourist traps near major attractions\n" +
+        "- Use local food apps and review sites\n\n" +
+        "💡 Hidden Gem Indicators:\n" +
+        "- Lines of locals waiting to eat\n" +
+        "- Family-run establishments\n" +
+        "- Seasonal menu changes\n" +
+        "- Limited seating capacity\n" +
+        "- Specialization in one type of dish\n\n" +
+        "Would you like specific recommendations for a particular cuisine or destination? I can suggest everything from street food to fine dining! 🌟";
     } else if (query.toLowerCase().includes("itinerary") || query.toLowerCase().includes("plan")) {
       fallbackResponse = "Let me help you create the perfect travel itinerary! Here's my framework for a balanced trip:\n\n" +
         "📅 Morning: Start with major attractions when they're less crowded\n" +
