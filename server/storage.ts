@@ -54,9 +54,14 @@ export interface IStorage {
 }
 
 export class MongoStorage implements IStorage {
-  async getUser(id: number): Promise<User | undefined> {
-    const user = await UserModel.findById(id);
-    return user ? this.mapUserFromMongoose(user) : undefined;
+  async getUser(id: string): Promise<User | undefined> {
+    try {
+      const user = await UserModel.findById(id);
+      return user ? this.mapUserFromMongoose(user) : undefined;
+    } catch (error) {
+      console.error('Error getting user:', error);
+      return undefined;
+    }
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {

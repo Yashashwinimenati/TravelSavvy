@@ -5,13 +5,13 @@ import { storage } from "../storage";
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.session.userId;
-    
+
     if (!userId) {
       return res.status(401).json({ message: "Authentication required" });
     }
-    
-    const user = await storage.getUser(Number(userId));
-    
+
+    const user = await storage.getUser(userId);
+
     if (!user) {
       req.session.destroy((err) => {
         if (err) {
@@ -20,10 +20,10 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
       });
       return res.status(401).json({ message: "Invalid session" });
     }
-    
+
     // Add user to request for use in controllers
     req.user = user;
-    
+
     next();
   } catch (error) {
     console.error("Authentication error:", error);
@@ -35,24 +35,24 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.session.userId;
-    
+
     if (!userId) {
       return res.status(401).json({ message: "Authentication required" });
     }
-    
+
     const user = await storage.getUser(Number(userId));
-    
+
     if (!user) {
       return res.status(401).json({ message: "Invalid session" });
     }
-    
+
     if (!user.isAdmin) {
       return res.status(403).json({ message: "Admin access required" });
     }
-    
+
     // Add user to request for use in controllers
     req.user = user;
-    
+
     next();
   } catch (error) {
     console.error("Admin authentication error:", error);
@@ -64,7 +64,7 @@ export const requireAdmin = async (req: Request, res: Response, next: NextFuncti
 export const populateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.session.userId;
-    
+
     if (userId) {
       const user = await storage.getUser(Number(userId));
       if (user) {
@@ -72,7 +72,7 @@ export const populateUser = async (req: Request, res: Response, next: NextFuncti
         req.user = user;
       }
     }
-    
+
     next();
   } catch (error) {
     console.error("User population error:", error);

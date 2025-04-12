@@ -94,7 +94,7 @@ export const createItinerary = async (req: Request, res: Response) => {
     
     // Create the itinerary
     const itinerary = await storage.createItinerary({
-      userId: Number(userId),
+      userId: userId,
       name,
       destination,
       startDate,
