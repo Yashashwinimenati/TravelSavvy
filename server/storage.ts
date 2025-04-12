@@ -53,58 +53,42 @@ export interface IStorage {
   updateBookingStatus(id: string, status: string): Promise<Booking>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private destinations: Map<string, Destination>;
-  private restaurants: Map<string, Restaurant>;
-  private activities: Map<string, Activity>;
-  private itineraries: Map<string, Itinerary>;
-  private userCurrentItinerary: Map<number, string>;
-  private bookings: Map<string, Booking>;
-  currentId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.destinations = new Map();
-    this.restaurants = new Map();
-    this.activities = new Map();
-    this.itineraries = new Map();
-    this.userCurrentItinerary = new Map();
-    this.bookings = new Map();
-    this.currentId = 1;
-    
-    // Initialize with sample data
-    this.initSampleData();
-  }
-
-  // User methods
+export class MongoStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const user = await UserModel.findById(id);
+    return user ? this.mapUserFromMongoose(user) : undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username.toLowerCase() === username.toLowerCase(),
-    );
+    const user = await UserModel.findOne({ username: new RegExp(`^${username}$`, 'i') });
+    return user ? this.mapUserFromMongoose(user) : undefined;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email?.toLowerCase() === email.toLowerCase(),
-    );
+    const user = await UserModel.findOne({ email: new RegExp(`^${email}$`, 'i') });
+    return user ? this.mapUserFromMongoose(user) : undefined;
   }
 
   async createUser(insertUser: InsertUser & { email?: string; firstName?: string; lastName?: string; }): Promise<User> {
-    const id = this.currentId++;
-    const user: User = { 
-      ...insertUser, 
-      id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+    const user = await UserModel.create({
+      ...insertUser,
       isAdmin: false
+    });
+    return this.mapUserFromMongoose(user);
+  }
+
+  private mapUserFromMongoose(user: any): User {
+    return {
+      id: user._id.toString(),
+      username: user.username,
+      password: user.password,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      isAdmin: user.isAdmin,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString()
     };
-    this.users.set(id, user);
-    return user;
   }
 
   // Destination methods
@@ -718,4 +702,5 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { UserModel } from './database/models';
+export const storage = new MongoStorage();
