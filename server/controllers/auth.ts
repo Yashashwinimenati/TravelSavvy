@@ -27,20 +27,31 @@ export const register = async (req: Request, res: Response) => {
       return res.status(409).json({ message: "Email already registered" });
     }
     
-    // Create user
+    // Create user with MongoDB model
     const user = await storage.createUser({
       username,
       email,
-      password, // In a real app, this would be hashed
+      password,
       firstName: "",
       lastName: "",
+      isAdmin: false
     });
+
+    if (!user) {
+      return res.status(500).json({ message: "Failed to create user" });
+    }
     
-    // Create session
-    req.session.userId = user.id;
+    // Create session with MongoDB _id
+    req.session.userId = user.id.toString();
     
     // Return user details (excluding password)
-    const { password: _, ...userWithoutPassword } = user;
+    const userResponse = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName
+    };
     
     res.status(201).json(userWithoutPassword);
   } catch (error: any) {
