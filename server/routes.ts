@@ -15,7 +15,12 @@ import { requireAuth } from "./middleware/auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
-  // Auth routes
+  app.post('/api/register', authController.register);
+  app.post('/api/login', authController.login);
+  app.post('/api/logout', authController.logout);
+  app.get('/api/user', requireAuth, authController.getMe);
+  
+  // Also keep the original auth routes for backward compatibility
   app.post('/api/auth/register', authController.register);
   app.post('/api/auth/login', authController.login);
   app.post('/api/auth/logout', authController.logout);
@@ -23,8 +28,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Destination routes
   app.get('/api/destinations', destinationsController.getAllDestinations);
-  app.get('/api/destinations/featured', destinationsController.getFeaturedDestinations);
-  app.get('/api/destinations/:id', destinationsController.getDestinationById);
   app.get('/api/destinations/featured', destinationsController.getFeaturedDestinations);
   app.get('/api/destinations/:id', destinationsController.getDestinationById);
 
