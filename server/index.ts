@@ -51,7 +51,16 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Try to connect to MongoDB, but use memory storage if it fails
+  // Declare global namespace extension for TypeScript
+declare global {
+  namespace NodeJS {
+    interface Global {
+      storage: any;
+    }
+  }
+}
+
+// Try to connect to MongoDB, but use memory storage if it fails
   try {
     // Attempt MongoDB connection with a timeout
     console.log('Attempting to connect to MongoDB...');
@@ -60,6 +69,7 @@ app.use((req, res, next) => {
     if (mongoStorage) {
       console.log('MongoDB connection established successfully');
       // Replace the default storage with MongoDB storage
+      // @ts-ignore - Storage implementation switch
       global.storage = mongoStorage;
     } else {
       console.log('Falling back to in-memory storage');
