@@ -702,5 +702,5 @@ export class MongoStorage implements IStorage {
   }
 }
 
-import { UserModel } from './database/models';
+import { User as UserModel } from './database/models';
 export const storage = new MongoStorage();
