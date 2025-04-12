@@ -60,7 +60,7 @@ export class MongoDBStorage implements IStorage {
   async createUser(userData: InsertUser & { email?: string; firstName?: string; lastName?: string; }): Promise<User> {
     try {
       // Create new user document
-      const newUser = new UserModel({
+      const newUser = await UserModel.create({
         username: userData.username,
         password: userData.password, // Should be hashed in production
         email: userData.email,
@@ -69,11 +69,10 @@ export class MongoDBStorage implements IStorage {
         isAdmin: userData.isAdmin || false
       });
 
-      // Save to database
-      const savedUser = await newUser.save();
+      console.log('User created in MongoDB:', newUser); // Add logging
       
       // Map and return the user
-      return this.mapUserFromMongoose(savedUser);
+      return this.mapUserFromMongoose(newUser);
     } catch (error) {
       console.error('Error creating user:', error);
       throw new Error('Failed to create user');
