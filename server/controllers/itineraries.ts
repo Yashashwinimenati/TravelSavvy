@@ -44,11 +44,7 @@ export const getUserItineraries = async (req: Request, res: Response) => {
 // Create a new itinerary
 export const createItinerary = async (req: Request, res: Response) => {
   try {
-    const userId = req.session.userId;
-    
-    if (!userId) {
-      return res.status(401).json({ message: "Authentication required" });
-    }
+    const userId = req.session.userId || 0; // Use 0 as default user ID if not authenticated
     
     const { name, destination, numberOfDays, startDate, prompt } = req.body;
     

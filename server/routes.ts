@@ -32,7 +32,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Itinerary routes
   app.get('/api/itineraries/current', requireAuth, itinerariesController.getCurrentItinerary);
   app.get('/api/itineraries/user', requireAuth, itinerariesController.getUserItineraries);
-  app.post('/api/itineraries', requireAuth, itinerariesController.createItinerary);
+  app.post('/api/itineraries', itinerariesController.createItinerary);
   app.get('/api/itineraries/:id', requireAuth, itinerariesController.getItineraryById);
   app.patch('/api/itineraries/:id', requireAuth, itinerariesController.updateItinerary);
   app.delete('/api/itineraries/:id', requireAuth, itinerariesController.deleteItinerary);
