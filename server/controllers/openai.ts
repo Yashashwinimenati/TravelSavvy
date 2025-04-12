@@ -18,19 +18,68 @@ export const processQuery = async (req: Request, res: Response) => {
     // OpenAI API quota exceeded, provide a fallback response
     let fallbackResponse = "";
     
-    // Generate a simple fallback response based on common travel queries
+    // Generate detailed, personalized fallback responses
     if (query.toLowerCase().includes("destination") || query.toLowerCase().includes("where")) {
-      fallbackResponse = "Popular travel destinations include Paris, Tokyo, New York, Rome, and Bali. Each offers unique cultural experiences, cuisine, and attractions. Where would you like to know more about?";
+      fallbackResponse = "I'd be happy to help you find the perfect destination! Here are some curated suggestions:\n\n" +
+        "🌟 For Culture & History: Paris (iconic landmarks, world-class museums), Rome (ancient ruins, artistic heritage)\n" +
+        "🏖️ For Beaches & Relaxation: Bali (tropical paradise, wellness), Maldives (pristine beaches, luxury resorts)\n" +
+        "🌆 For Urban Exploration: Tokyo (modern meets traditional), New York (diverse neighborhoods, entertainment)\n" +
+        "🏔️ For Adventure: New Zealand (outdoor activities), Costa Rica (rainforests, wildlife)\n\n" +
+        "Which type of experience interests you most? I can provide specific details about any destination!";
     } else if (query.toLowerCase().includes("restaurant") || query.toLowerCase().includes("food") || query.toLowerCase().includes("eat")) {
-      fallbackResponse = "When traveling, try local cuisine and restaurants recommended by locals. Food markets and family-owned establishments often provide authentic experiences. Would you like recommendations for a specific location?";
+      fallbackResponse = "Finding authentic local cuisine is key to a memorable travel experience! Here's my expert advice:\n\n" +
+        "🍽️ Best practices for finding great local food:\n" +
+        "- Follow where locals eat during off-peak hours\n" +
+        "- Explore morning markets for fresh, authentic dishes\n" +
+        "- Look for restaurants with simple menus in the local language\n" +
+        "- Ask your hotel staff for their personal favorites\n\n" +
+        "Would you like specific restaurant recommendations for a particular destination or cuisine type?";
     } else if (query.toLowerCase().includes("itinerary") || query.toLowerCase().includes("plan")) {
-      fallbackResponse = "A good travel itinerary balances sightseeing, relaxation, and free time for unexpected discoveries. Consider 2-3 major activities per day and leave room for spontaneity.";
+      fallbackResponse = "Let me help you create the perfect travel itinerary! Here's my framework for a balanced trip:\n\n" +
+        "📅 Morning: Start with major attractions when they're less crowded\n" +
+        "🌅 Afternoon: Mix in smaller sites, shopping, or relaxation\n" +
+        "🌙 Evening: Experience local culture through food and entertainment\n\n" +
+        "Key tips:\n" +
+        "- Plan 2-3 major activities per day\n" +
+        "- Include buffer time for spontaneous discoveries\n" +
+        "- Group activities by location to minimize travel time\n" +
+        "- Schedule rest days for longer trips\n\n" +
+        "Would you like me to help plan a specific itinerary?";
     } else if (query.toLowerCase().includes("budget") || query.toLowerCase().includes("cost") || query.toLowerCase().includes("price")) {
-      fallbackResponse = "Travel costs vary widely by destination, season, and style. Southeast Asia and parts of Latin America are budget-friendly, while Western Europe and Japan tend to be more expensive.";
+      fallbackResponse = "Let me break down travel costs to help you plan better!\n\n" +
+        "💰 Budget considerations by region:\n" +
+        "- Budget-friendly: Southeast Asia ($30-50/day), Eastern Europe ($40-60/day)\n" +
+        "- Mid-range: Southern Europe ($100-150/day), Japan ($150-200/day)\n" +
+        "- Luxury: Western Europe ($200+/day), Maldives ($300+/day)\n\n" +
+        "Money-saving tips:\n" +
+        "- Book accommodations in advance\n" +
+        "- Travel during shoulder season\n" +
+        "- Use public transportation\n" +
+        "- Look for free walking tours and attractions\n\n" +
+        "Would you like specific budget advice for a destination?";
     } else if (query.toLowerCase().includes("tip") || query.toLowerCase().includes("advice")) {
-      fallbackResponse = "Some travel tips: research local customs before you go, learn a few phrases in the local language, keep digital copies of important documents, and pack less than you think you need.";
+      fallbackResponse = "Here are my top travel tips for a smooth and enjoyable journey:\n\n" +
+        "✈️ Before departure:\n" +
+        "- Research local customs and basic phrases\n" +
+        "- Make digital copies of important documents\n" +
+        "- Download offline maps and translation apps\n\n" +
+        "🎒 Packing smart:\n" +
+        "- Pack versatile clothing layers\n" +
+        "- Bring a portable charger and adapters\n" +
+        "- Pack essentials in carry-on\n\n" +
+        "🌍 During your trip:\n" +
+        "- Stay flexible with your plans\n" +
+        "- Try local experiences\n" +
+        "- Keep emergency contacts handy\n\n" +
+        "Would you like more specific tips for your upcoming trip?";
     } else {
-      fallbackResponse = "I'm TravelSage, your travel assistant. I can help with destination information, restaurant recommendations, itinerary planning, and travel tips. What would you like to know about?";
+      fallbackResponse = "👋 Hello! I'm TravelSage, your personal travel expert. I can help you with:\n\n" +
+        "🌎 Destination recommendations\n" +
+        "🍽️ Restaurant suggestions\n" +
+        "📅 Custom itinerary planning\n" +
+        "💰 Budget advice\n" +
+        "✈️ Travel tips and best practices\n\n" +
+        "What aspect of travel would you like to explore?";
     }
     
     // Return the fallback response
