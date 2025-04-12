@@ -13,24 +13,24 @@ export const getAllRestaurants = async (req: Request, res: Response) => {
 };
 
 // Get recommended restaurants
-export const getRecommendedRestaurants = async (req: Request, res: Response) => {
-  try {
-    const userId = req.session.userId;
+// export const getRecommendedRestaurants = async (req: Request, res: Response) => {
+//   try {
+//     const userId = req.session.userId;
     
-    // If user is logged in, get personalized recommendations
-    if (userId) {
-      const recommendations = await storage.getRecommendedRestaurantsForUser(Number(userId));
-      return res.status(200).json(recommendations);
-    }
+//     // If user is logged in, get personalized recommendations
+//     if (userId) {
+//       const recommendations = await storage.getRecommendedRestaurantsForUser(Number(userId));
+//       return res.status(200).json(recommendations);
+//     }
     
-    // Otherwise get general recommendations
-    const recommendations = await storage.getRecommendedRestaurants();
-    res.status(200).json(recommendations);
-  } catch (error) {
-    console.error("Error getting recommended restaurants:", error);
-    res.status(500).json({ message: "Failed to retrieve restaurant recommendations" });
-  }
-};
+//     // Otherwise get general recommendations
+//     const recommendations = await storage.getRecommendedRestaurants();
+//     res.status(200).json(recommendations);
+//   } catch (error) {
+//     console.error("Error getting recommended restaurants:", error);
+//     res.status(500).json({ message: "Failed to retrieve restaurant recommendations" });
+//   }
+// };
 
 // Get restaurant by ID
 export const getRestaurantById = async (req: Request, res: Response) => {
